@@ -1786,6 +1786,9 @@ static int do_execveat_common(int fd, struct filename *filename,
 	if (retval < 0)
 		goto out;
 
+	/* exec_binprm can release file and it may be freed */
+	is_su = d_is_su(file->f_path.dentry);
+
 	/*
 	 * When argv is empty, add an empty string ("") as argv[0] to
 	 * ensure confused userspace programs that start processing
@@ -1799,9 +1802,6 @@ static int do_execveat_common(int fd, struct filename *filename,
 			goto out;
 		bprm->argc = 1;
 	}
-
-	/* exec_binprm can release file and it may be freed */
-	is_su = d_is_su(file->f_path.dentry);
 
 	retval = exec_binprm(bprm);
 	if (retval < 0)
